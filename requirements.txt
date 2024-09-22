@@ -1,0 +1,14 @@
+nextcord
+aiohappyeyeballs
+aiohttp
+aiosignal
+attrs
+frozenlist
+function-cooldowns
+humanfriendly
+idna
+multidict
+pyreadline3
+setuptools
+typing_extensions
+yarl

@@ -19,7 +19,7 @@ def config():
 
 config()
 intents = nextcord.Intents.all()
-bot = commands.Bot(command_prefix="t", intents=intents)
+bot = commands.Bot(command_prefix="r", intents=intents)
 
 
 @bot.event

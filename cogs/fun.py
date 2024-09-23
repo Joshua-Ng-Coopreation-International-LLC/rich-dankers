@@ -51,7 +51,7 @@ member is a required argument that is missing.```""",
             responded = True
         if not responded:
             await ctx.send(
-                f"""```{self.bot.command_prefix}moot <member> <duration>
+                f"""```{self.bot.command_prefix}mute <member> <duration>
  ^^^^^^^^
 member or duration is a required argument that is missing.```""",
                 delete_after=8,

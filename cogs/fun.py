@@ -44,7 +44,7 @@ member is a required argument that is missing.```""",
         await ctx.message.delete()
         if target and duration:
             time_delta = datetime.timedelta(seconds=parse_timespan(duration))
-            expiry_time = datetime.now() + time_delta
+            expiry_time = datetime.datetime.now() + time_delta
             await ctx.send(
                 f"**{target.name}** has been **muted** in **{ctx.guild.name}** expires {nextcord.utils.format_dt(expiry_time, 'R')}"
             )

@@ -46,55 +46,57 @@ class Utility(commands.Cog):
         await ctx.channel.purge(limit=limit)
         await ctx.send(f"Purged {limit} messages.", delete_after=3)
 
-    @commands.command(aliases=["uvl"])
-    @commands.has_any_role(1275022893264404533, 1280220951077720178)
-    async def unviewlock(self, ctx, role:Optional[nextcord.Role]):
-        with open("config.json", "r") as config:
-            config = json.load(config)
-        await ctx.channel.set_permissions(
-            role if role else ctx.guild.get_role(config["defaultrole"]),
-            view_channel=True,
-        )
-
-        await ctx.channel.set_permissions(ctx.author, view_channel=True)
-        await ctx.message.delete()
-        await ctx.send("Done", delete_after=2)
-
     @commands.command(aliases=["vl"])
-    @commands.has_any_role(1275022893264404533, 1280220951077720178)
-    async def viewlock(self, ctx, role:Optional[nextcord.Role]):
-        with open("config.json", "r") as config:
-            config = json.load(config)
-        await ctx.channel.set_permissions(
-            role if role else ctx.guild.get_role(config["defaultrole"]),
-            view_channel=False
-            )
-        await ctx.channel.set_permissions(ctx.guild.default_role, view_channel=False)
-        await ctx.channel.set_permissions(ctx.author, view_channel=True)
-        await ctx.message.delete()
-        await ctx.send("Done", delete_after=2)
-
-    @commands.command(aliases=["rvp"])
-    @commands.has_any_role(1275022893264404533, 1280220951077720178)
-    async def reset_channel_overwrites(self, ctx):
-        channel = ctx.channel
-        for overwrite_target in channel.overwrites:
-            await channel.set_permissions(overwrite_target, overwrite=None)
-
-        await ctx.send("Done")
-
-    @commands.command(aliases=["akg"])
-    @commands.has_any_role(1275022893264404533, 1280220951077720178)
-    async def allow_grinder_view(self, ctx):
-        channel = ctx.channel
-        with open("config.json", "r") as config:
-            config = json.load(config)
-        await channel.set_permissions(
-            ctx.guild.get_role(config["defaultrole"]), view_channel=False
+    @commands.has_any_role(1274079697684402237, 1280220951077720178)
+    async def viewlock(self, ctx, role: nextcord.Role = None):
+        msg = await ctx.send(
+            f"Viewlocking for {role.mention if role else '`@everyone`'}..."
         )
-        await channel.set_permissions(ctx.guild.get_role(1275506029010096313), view_channel=True)
-        await ctx.message.delete()
-        await ctx.send("Done", delete_after=2)
+        await ctx.message.channel.set_permissions(
+            role if role else ctx.guild.default_role, view_channel=False
+        )
+        await msg.edit(
+            f"Viewlocked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
+        )
+
+    @commands.command(aliases=["uvl"])
+    @commands.has_any_role(1274079697684402237, 1280220951077720178)
+    async def unviewlock(self, ctx, role: nextcord.Role = None):
+        msg = await ctx.send(
+            f"Un-viewlocking for {role.mention if role else '`@everyone`'}..."
+        )
+        await ctx.message.channel.set_permissions(
+            role if role else ctx.guild.default_role, view_channel=True
+        )
+        await msg.edit(
+            f"Un-viewlocked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
+        )
+        
+    @commands.command(aliases=["l"])
+    @commands.has_any_role(1274079697684402237, 1280220951077720178)
+    async def lock(self, ctx, role: nextcord.Role=None):
+        msg = await ctx.send(
+            f"Locking {ctx.channel.mention} for {role.mention if role else '`@everyone`'}..."
+        )
+        await ctx.message.channel.set_permissions(
+            role if role else ctx.guild.default_role, send_messages=False
+        )
+        await msg.edit(
+            f"Locked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
+        )
+        
+    @commands.command(aliases=["ul"])
+    @commands.has_any_role(1274079697684402237, 1280220951077720178)
+    async def unlock(self, ctx, role: nextcord.Role=None):
+        msg = await ctx.send(
+            f"Unlocking {ctx.channel.mention} for {role.mention if role else '`@everyone`'}..."
+        )
+        await ctx.message.channel.set_permissions(
+            role if role else ctx.guild.default_role, send_messages=True
+        )
+        await msg.edit(
+            f"Unlocked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
+        )
 
 def setup(bot):
     bot.add_cog(Utility(bot))

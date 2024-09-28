@@ -67,7 +67,6 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_command_error(ctx, exception):
-    print(commands.Command.has_error_handler(ctx))
     if commands.Command.has_error_handler(ctx):
         return
     if isinstance(exception, commands.errors.CommandNotFound):

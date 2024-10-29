@@ -2,7 +2,7 @@ from nextcord.ext import commands
 from utils.embed import embed
 from humanfriendly import parse_timespan
 import nextcord, datetime
-from utils.perms import funcog_permission_handler
+from utils.perms import premium_command_handler
 
 
 class Fun(commands.Cog):
@@ -20,7 +20,7 @@ class Fun(commands.Cog):
         )
 
     @commands.command()
-    @funcog_permission_handler(command="bon")
+    @premium_command_handler(command="bon")
     async def bon(self, ctx, target: nextcord.Member = None):
         responded = False
         await ctx.message.delete()
@@ -38,7 +38,7 @@ member is a required argument that is missing.```""",
             )
 
     @commands.command()
-    @funcog_permission_handler(command="moot")
+    @premium_command_handler(command="moot")
     async def moot(self, ctx, target: nextcord.Member = None, duration: str = None):
         responded = False
         await ctx.message.delete()
@@ -58,7 +58,7 @@ member or duration is a required argument that is missing.```""",
             )
 
     @commands.command()
-    @funcog_permission_handler(command="exit")
+    @premium_command_handler(command="exit")
     async def exit(self, ctx):
         await ctx.message.delete()
         await ctx.send(
@@ -66,7 +66,7 @@ member or duration is a required argument that is missing.```""",
         )
 
     @commands.command()
-    @funcog_permission_handler(command="enter")
+    @premium_command_handler(command="enter")
     async def enter(self, ctx):
         await ctx.message.delete()
         await ctx.send(

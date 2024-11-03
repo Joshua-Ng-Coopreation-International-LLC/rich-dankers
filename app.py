@@ -1,5 +1,5 @@
 import nextcord, json, traceback, os, sys, typing
-from nextcord.ext import commands
+from nextcord.ext import commands, tasks
 from utils.embed import embed
 from utils.load import load_config
 
@@ -384,6 +384,16 @@ async def sync(ctx):
         await ctx.reply(str(e))
         return
     await ctx.send("Synced commands.")
+
+
+@tasks.loop(hours=1)
+async def resync_commands():
+    try:
+        await bot.sync_all_application_commands()
+    except Exception as e:
+        print(f"Failed to sync commands: {str(e)}")
+        return
+    print("[/] Synced commands successfully.")
 
 
 @bot.command(name="restart")

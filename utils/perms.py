@@ -64,6 +64,8 @@ def ping_group_slash_permission_handler(value: str):
 
     async def predicate(interaction):
         user_roles = [role.id for role in interaction.user.roles]
-        return any(role_id in user_roles for role_id in role_ids)
+        return application_checks.has_any_role(
+            *(role_id in user_roles for role_id in role_ids)
+        )
 
     return application_checks.check(predicate)

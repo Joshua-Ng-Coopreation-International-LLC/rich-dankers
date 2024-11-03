@@ -139,6 +139,7 @@ bot.help_command = HelpCommand()
 
 @bot.event
 async def on_ready():
+    resync_commands.start()
     print("Connected.")
     for filename in os.listdir(cogdir):
         if filename.endswith(".py"):

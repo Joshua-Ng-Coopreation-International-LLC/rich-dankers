@@ -1,5 +1,6 @@
 import json, nextcord, cooldowns, datetime
 from utils.embed import embed
+from utils.perms import ping_group_slash_permission_handler
 from nextcord.ext import commands
 from nextcord import SlashOption
 from cooldowns import CallableOnCooldown
@@ -30,11 +31,37 @@ class Messages(commands.Cog):
         error = getattr(error, "original", error)
 
         if isinstance(error, CallableOnCooldown):
-            await interaction.send(
-                f"You are being rate-limited! Retry in `{error.retry_after:.2f}` seconds."
+            await (
+                interaction.response.defer()
+                if interaction.response.is_done()
+                else interaction.response.send_message(
+                    f"You are being rate-limited! Retry in `{error.retry_after:.2f}` seconds.",
+                    ephemeral=True,
+                )
             )
+            return
+
+        elif isinstance(error, nextcord.errors.ApplicationCheckFailure):
+            await (
+                interaction.response.defer()
+                if interaction.response.is_done()
+                else interaction.response.send_message(
+                    "You do not have the required roles/permissions to run this command!",
+                    ephemeral=True,
+                )
+            )
+            return
+
         else:
-            raise error
+            await (
+                interaction.response.defer()
+                if interaction.response.is_done()
+                else interaction.response.send_message(
+                    f"An unknown error occurred, please report this to the bot developer.\n{error}",
+                    ephemeral=True,
+                )
+            )
+            return
 
     @commands.group()
     async def goal(self, ctx):
@@ -94,13 +121,15 @@ class Messages(commands.Cog):
             view=view,
         )
 
+    # @nextcord.slash_command(name="heistlock")
+
     @nextcord.slash_command(name="ping")
     @commands.has_any_role(1277204324920983572, 1280220951077720178)
     async def ping(self, interaction):
         return
 
     @ping.subcommand(name="giveaway")
-    @commands.has_any_role(1277204324920983572, 1280220951077720178)
+    @ping_group_slash_permission_handler("giveaway")
     async def giveawayping(
         self,
         interaction,
@@ -117,7 +146,13 @@ class Messages(commands.Cog):
         ),
         donator: str = SlashOption(
             name="donator",
-            description="send the link to the donation here if you funded it yourself leave it blank",
+            description="Send the link to the donation message",
+            required=True,
+        ),
+        donor: nextcord.Member = None,
+        gwmessage: str = SlashOption(
+            name="message",
+            description="What is the message of the giveaway?",
             required=False,
         ),
         notes: str = SlashOption(
@@ -130,15 +165,17 @@ class Messages(commands.Cog):
         type = dict[type]
         view = nextcord.ui.View()
         role = interaction.guild.get_role(type)
-        msg = await interaction.response.send_message(
+        msg = await interaction.channel.send(
             content=f"{role.mention}",
             embed=embed(
                 title="Giveaway <a:giveaway:1297975613339992064>",
-                description=f"{interaction.user.mention} just hosted a giveaway(s)!\nPlease create a ticket to claim your prize(s)!)",
+                description=f"{interaction.user.mention} just hosted a giveaway(s)!\n**Prize:** {prize}\n**Sponsor:** {donor.mention if donor else interaction.user.mention}",
             ),
             allowed_mentions=nextcord.AllowedMentions.all(),
         )
-        msg = await msg.fetch()
+        await interaction.channel.send(
+            f"**<:BDH_Heart_1:1295458655021437031> THANK THE SPONSOR IN <#1274056217010114603> <:BDH_Heart_1:1295458655021437031>**\n**{donor.mention if donor else interaction.user.mention}: {gwmessage if gwmessage else 'No message provided, enjoy the giveaway!'}**"
+        )
         view.add_item(
             nextcord.ui.Button(
                 label="Jump the giveaway",
@@ -148,13 +185,123 @@ class Messages(commands.Cog):
             )
         )
         loggingchannel = interaction.guild.get_channel(1279349251821932604)
-        await loggingchannel.send(
+        logmsg = await loggingchannel.send(
             embed=embed(
                 title=f"New Giveaway Log by {interaction.user.name} ({interaction.user.id})",
                 description=f"**Type:**  {type}\n**Prize:** {prize}\n**Sponsor link:** {donator}\n**Giveaway link:** {msg.jump_url}\n**Notes:** {notes}\n**User:** {interaction.user.mention} ({interaction.user.id})",
             ),
             view=view,
         )
+        eview = nextcord.ui.View()
+        eview.add_item(
+            nextcord.ui.Button(
+                label="Jump to Logging Message",
+                style=nextcord.ButtonStyle.link,
+                url=logmsg.jump_url,
+            )
+        )
+        eview.add_item(
+            nextcord.ui.Button(
+                label="Jump to Ping Message",
+                style=nextcord.ButtonStyle.link,
+                url=msg.jump_url,
+            )
+        )
+        await interaction.response.send_message(
+            embed=embed(
+                title="Sucess",
+                description="Process done, thank you for hosting giveaway/ event!",
+            ),
+            view=eview,
+            ephemeral=True,
+        )
+
+    @ping.subcommand(name="event")
+    @ping_group_slash_permission_handler("event")
+    async def eventping(
+        self,
+        interaction,
+        type: str = SlashOption(
+            name="type",
+            description="What type of event are you hosting?",
+        ),
+        prize: str = SlashOption(
+            name="prize", description="What is the prize of the event?"
+        ),
+        donator: nextcord.Member = None,
+        message: str = SlashOption(
+            name="message",
+            description="Is there a message or requirement for this event?",
+            required=False,
+        ),
+        notes: str = SlashOption(
+            name="notes",
+            description="Any notes you want to add when logging?",
+            required=False,
+        ),
+    ):
+        if not donator:
+            donator = interaction.user
+        loggingchannel = interaction.guild.get_channel(1279349251821932604)
+        role = interaction.guild.get_role(1274065970213683270)
+        view = nextcord.ui.View()
+        msg = await interaction.channel.send(
+            content=role.mention,
+            embed=embed(
+                title="Event <a:wumpus_typing:1300465316912037940>",
+                description=f"{interaction.user.mention} is hosting **{type.upper()}**!\n**Donator:** {donator.mention if donator else interaction.user.mention}\n**Prize:** {prize}\n**Message:** {message}",
+            ),
+        )
+        view.add_item(
+            nextcord.ui.Button(
+                label="Jump the event",
+                style=nextcord.ButtonStyle.link,
+                url=f"{msg.jump_url}",
+                emoji="<a:pin:1297983351688532028>",
+            )
+        )
+        logmsg = await loggingchannel.send(
+            embed=embed(
+                title=f"New Event Log by {interaction.user.name} ({interaction.user.id})",
+                description=f"**Type:**  {type}\n**Prize:** {prize}\n**Sponsor link:** {donator}\n**Event link:** {msg.jump_url}\n**Notes:** {notes}\n**User:** {interaction.user.mention} ({interaction.user.id})",
+            ),
+            view=view,
+        )
+        eview = nextcord.ui.View()
+        eview.add_item(
+            nextcord.ui.Button(
+                label="Jump to Logging Message",
+                style=nextcord.ButtonStyle.link,
+                url=logmsg.jump_url,
+            )
+        )
+        eview.add_item(
+            nextcord.ui.Button(
+                label="Jump to Ping Message",
+                style=nextcord.ButtonStyle.link,
+                url=msg.jump_url,
+            )
+        )
+        await interaction.response.send_message(
+            embed=embed(
+                title="Sucess",
+                description="Process done, thank you for hosting giveaway/ event!",
+            ),
+            view=eview,
+            ephemeral=True,
+        )
+
+    @eventping.on_autocomplete("type")
+    async def eventtype(self, interaction, type: str):
+        eventtypes = ["Rumble", "Mafia", "Black Tea", "Hangry", "Guess The Number"]
+        if not type:
+            await interaction.response.send_autocomplete(eventtypes)
+            return
+        filteredlist = [
+            types for types in eventtypes if types.lower().startswith(type.lower())
+        ]
+        filteredlist.append(type)
+        await interaction.response.send_autocomplete(filteredlist)
 
 
 def setup(bot):

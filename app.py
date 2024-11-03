@@ -307,9 +307,4 @@ async def restart(ctx):
     os.execl(python, python, *sys.argv)
 
 
-@bot.command(name="hi")
-async def hi(ctx, jaospfad: str):
-    return
-
-
 bot.run(token)

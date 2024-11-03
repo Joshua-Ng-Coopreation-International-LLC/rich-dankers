@@ -97,6 +97,7 @@ class Utility(commands.Cog):
         await msg.edit(
             f"Unlocked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
         )
+        
 
 def setup(bot):
     bot.add_cog(Utility(bot))

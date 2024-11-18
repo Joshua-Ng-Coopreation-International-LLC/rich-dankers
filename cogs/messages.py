@@ -115,7 +115,7 @@ class Messages(commands.Cog):
             content=target.mention,
             embed=embed(
                 "Payout Notification <a:money1:1280477464442830911>",
-                description=f"Please head to <#1275509807050395769> to claim your **{prize}** __with{nextcord.utils.format_dt(datetime.datetime.now()+datetime.timedelta(hours=24), "R")}__.\nMake sure to copy the message link to make this process faster.\nThank you very much!",
+                description=f"Please head to <#1275509807050395769> to claim your **{prize}** __with{nextcord.utils.format_dt(datetime.datetime.now()+datetime.timedelta(hours=24), 'R')}__.\nMake sure to copy the message link to make this process faster.\nThank you very much!",
                 footer=f"Sent by {ctx.author.name} ({ctx.author.id}) - {datetime.datetime.now()}",
             ),
             view=view,

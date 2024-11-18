@@ -25,18 +25,22 @@ class Utility(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        self.snipe_dict[message.channel.id] = [message.content, message.created_at, message.author]
+        self.snipe_dict[message.channel.id] = [
+            message.content,
+            message.created_at,
+            message.author,
+        ]
 
     @commands.command()
     @commands.has_any_role(1274751694248480878, 1280220951077720178)  # 100m donor
     async def snipe(self, ctx):
         try:
             await ctx.send(
-            embed=embed(
-                "Sniped Message",
-                description=f"{self.snipe_dict[ctx.channel.id][0]} \n{nextcord.utils.format_dt(self.snipe_dict[ctx.channel.id][1], "R")} sent by {self.snipe_dict[ctx.channel.id][2].mention}",
+                embed=embed(
+                    "Sniped Message",
+                    description=f"{self.snipe_dict[ctx.channel.id][0]} \n{nextcord.utils.format_dt(self.snipe_dict[ctx.channel.id][1], 'R')} sent by {self.snipe_dict[ctx.channel.id][2].mention}",
+                )
             )
-        )
         except:
             await ctx.send("There's nothing to snipe!", delete_after=2)
 
@@ -71,10 +75,10 @@ class Utility(commands.Cog):
         await msg.edit(
             f"Un-viewlocked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
         )
-        
+
     @commands.command(aliases=["l"])
     @commands.has_any_role(1274079697684402237, 1280220951077720178)
-    async def lock(self, ctx, role: nextcord.Role=None):
+    async def lock(self, ctx, role: nextcord.Role = None):
         msg = await ctx.send(
             f"Locking {ctx.channel.mention} for {role.mention if role else '`@everyone`'}..."
         )
@@ -84,10 +88,10 @@ class Utility(commands.Cog):
         await msg.edit(
             f"Locked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
         )
-        
+
     @commands.command(aliases=["ul"])
     @commands.has_any_role(1274079697684402237, 1280220951077720178)
-    async def unlock(self, ctx, role: nextcord.Role=None):
+    async def unlock(self, ctx, role: nextcord.Role = None):
         msg = await ctx.send(
             f"Unlocking {ctx.channel.mention} for {role.mention if role else '`@everyone`'}..."
         )
@@ -97,7 +101,7 @@ class Utility(commands.Cog):
         await msg.edit(
             f"Unlocked {ctx.channel.mention} for {role.mention if role else '`@everyone`'}."
         )
-        
+
 
 def setup(bot):
     bot.add_cog(Utility(bot))
